@@ -5,7 +5,7 @@ from os import path
 import urllib3
 from dateutil.relativedelta import relativedelta
 
-from idea.youtrack import YouTrack
+from jetbrains_issues_dataset.idea.youtrack import YouTrack
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

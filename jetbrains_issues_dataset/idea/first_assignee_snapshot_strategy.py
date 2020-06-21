@@ -1,4 +1,4 @@
-from idea.issue_created_snapshot_strategy import IssueCreatedSnapshotStrategy
+from jetbrains_issues_dataset.idea.issue_created_snapshot_strategy import IssueCreatedSnapshotStrategy
 
 
 class FirstAssigneeSnapshotStrategy(IssueCreatedSnapshotStrategy):

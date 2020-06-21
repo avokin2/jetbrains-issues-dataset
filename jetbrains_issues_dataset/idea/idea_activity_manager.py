@@ -1,4 +1,4 @@
-from idea.activity_manager import ActivityManager
+from jetbrains_issues_dataset.idea.activity_manager import ActivityManager
 
 
 class IdeaActivityManager(ActivityManager):

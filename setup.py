@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='jetbrains-issues-dataset',
-    packages=['idea'],
+    packages=['jetbrains_issues_dataset'],
     version='1.0',
     license='MIT',
     description='Dataset of JetBrains issues',

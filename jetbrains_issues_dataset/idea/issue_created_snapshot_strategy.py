@@ -1,4 +1,4 @@
-from idea.snapshot_strategy import SnapshotStrategy
+from jetbrains_issues_dataset.idea.snapshot_strategy import SnapshotStrategy
 
 
 class IssueCreatedSnapshotStrategy(SnapshotStrategy):

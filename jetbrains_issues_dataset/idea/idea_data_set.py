@@ -5,8 +5,8 @@ import requests
 from tqdm import tqdm
 import zipfile
 
-from idea.idea_activity_manager import IdeaActivityManager
-from idea.snapshot_strategy import SnapshotStrategy
+from jetbrains_issues_dataset.idea.idea_activity_manager import IdeaActivityManager
+from jetbrains_issues_dataset.idea.snapshot_strategy import SnapshotStrategy
 
 
 def idea_2019_03_20_to_idea_2020_03_20(snapshot_manager=None):
