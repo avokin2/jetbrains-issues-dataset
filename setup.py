@@ -2,14 +2,14 @@ from distutils.core import setup
 
 setup(
     name='jetbrains-issues-dataset',
-    packages=['jetbrains_issues_dataset'],
-    version='1.0.1',
+    packages=['jetbrains_issues_dataset', 'jetbrains_issues_dataset.idea'],
+    version='1.0.2',
     license='MIT',
     description='Dataset of JetBrains issues',
     author='Andrey Vokin',
     author_email='andrey.vokin@gmail.com',
     url='https://github.com/user/avokin2',
-    download_url='https://github.com/avokin2/jetbrains-issues-dataset/archive/v_1.0.1.tar.gz',
+    download_url='https://github.com/avokin2/jetbrains-issues-dataset/archive/v_1.0.2.tar.gz',
     keywords=[],
     install_requires=[],
     classifiers=[
