@@ -1,6 +1,6 @@
-# youtrack-api-client
+# jetbrains-issues-dataset
 
-It's a library to work with YouTrack API. Right now it's useful to restore issues state till specified moment.
+It's a library to retrieve dataset of JetBrains issues
 
 ## Sample dataset retrieval
 To download activities and restore issues to defined state use the method 
@@ -16,7 +16,7 @@ issues = idea_2019_03_20_to_idea_2020_03_20(FirstAssigneeSnapshotStrategy())
 Or just check the file [examples/first_assignee.py](examples/first_assignee.py)
 
 ## Create your custom dataset
-Just tune the file [youtrack/download_activities.py](jetbrains_issues_dataset/idea/download_activities.py). 
+Just tune the file [jetbrains_issues_dataset/idea/download_activities.py](jjetbrains_issues_dataset/idea/download_activities.py). 
 It could be useful to read [Youtrack API Reference](https://www.jetbrains.com/help/youtrack/standalone/youtrack-rest-api-reference.html)
 Also do not run downloader on production server.   
 

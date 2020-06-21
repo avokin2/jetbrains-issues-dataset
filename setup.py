@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='jetbrains-issues-dataset',
     packages=['jetbrains_issues_dataset', 'jetbrains_issues_dataset.idea'],
-    version='1.0.2',
+    version='1.0.3',
     license='MIT',
     description='Dataset of JetBrains issues',
     author='Andrey Vokin',
