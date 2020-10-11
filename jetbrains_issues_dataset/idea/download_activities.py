@@ -12,8 +12,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 YOUTRACK_SERVER_URL = "http://youtrack-staging.labs.intellij.net/"
 
-start_date = datetime.datetime.strptime("2019-03-20 00:00:00", '%Y-%m-%d %H:%M:%S')
-end_date = datetime.datetime.strptime("2020-03-20 00:00:00", '%Y-%m-%d %H:%M:%S')
+start_date = datetime.datetime.strptime("2019-09-01 00:00:00", '%Y-%m-%d %H:%M:%S')
+end_date = datetime.datetime.now()
 
 start_time = datetime.datetime.now()
 
@@ -36,7 +36,8 @@ while start_date < end_date:
     end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
     print("Processing from: {} to: {}".format(start, end))
-    query = "%23IDEA%20created:%20{}%20..%20{}".format(start, end)
+    query = "%23KT%20created:%20{}%20..%20{}".format(start, end)
+    youtrack.download_activities(query, activities_file)
     youtrack.download_activities(query, activities_file)
     start_date = current_end_date
 

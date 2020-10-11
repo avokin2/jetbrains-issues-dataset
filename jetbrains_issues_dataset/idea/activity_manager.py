@@ -50,14 +50,20 @@ class ActivityManager:
                 for custom_field in target_issue['customFields']:
                     for allowed_custom_field_name, allowed_custom_field_params in self.custom_field_mapping.items():
                         if allowed_custom_field_params['name'] == custom_field['name'].lower():
-                            custom_field_value = custom_field['value'][allowed_custom_field_params['field']] \
-                                if custom_field['value'] is not None else None
+                            if allowed_custom_field_params['multivalue']:
+                                custom_field_value = []
+                                for cfv in custom_field['value']:
+                                    list_value = cfv[allowed_custom_field_params['field']]
+                                    custom_field_value.append(list_value)
+                            else:
+                                custom_field_value = custom_field['value'][allowed_custom_field_params['field']] \
+                                    if custom_field['value'] is not None else None
                             issue[custom_field['name'].lower()] = custom_field_value
 
                 self.issues[issue_id] = issue
 
                 if issue is not None:
-                    self.snapshot_strategy.process(
+                    self.snapshot_strategy.process_issue_created(
                         {'id': issue_id, 'id_readable': target_issue['idReadable'], 'comments': {}})
             else:
                 print("Duplicated IssueCreatedActivityItem for issue: {}".format(issue_id))
@@ -74,16 +80,24 @@ class ActivityManager:
                 added = activity['added'] if 'added' in activity else None
 
                 if activity_type == 'CustomFieldActivityItem':
-                    if target_member in self.custom_field_mapping:
-                        original_target_member = target_member
-                        target_member = self.custom_field_mapping[target_member]['name']
-                    else:
+                    if target_member not in self.custom_field_mapping:
                         return
+                    original_target_member = target_member
+                    target_member = self.custom_field_mapping[target_member]['name']
 
-                    removed = self._retrieve_field_value(removed,
-                                                         self.custom_field_mapping[original_target_member]['field'])
-                    added = self._retrieve_field_value(added,
-                                                       self.custom_field_mapping[original_target_member]['field'])
+                    if self.custom_field_mapping[original_target_member]['multivalue']:
+                        added_list = []
+                        for added_item in added:
+                            added_list.append(self._retrieve_field_value(added_item, self.custom_field_mapping[original_target_member]['field']))
+                        added = added_list
+
+                        removed_list = []
+                        for removed_item in removed:
+                            removed_list.append(self._retrieve_field_value(removed_item, self.custom_field_mapping[original_target_member]['field']))
+                        removed = removed_list
+                    else:
+                        removed = self._retrieve_field_value(removed, self.custom_field_mapping[original_target_member]['field'])
+                        added = self._retrieve_field_value(added, self.custom_field_mapping[original_target_member]['field'])
                 else:
                     if removed is not None and len(removed) == 0:
                         removed = None
@@ -91,10 +105,9 @@ class ActivityManager:
                         added = None
 
                 if removed is not None:
-                    self.snapshot_strategy.process_previous_attribute_values({'id': issue_id, target_member: removed})
-                    self.snapshot_strategy.process({'id': issue_id, target_member: None})
+                    self.snapshot_strategy.process_removed_field(issue_id, target_member, removed)
                 if added is not None:
-                    self.snapshot_strategy.process({'id': issue_id, target_member: added})
+                    self.snapshot_strategy.process_added_field(issue_id, target_member, added)
 
             elif activity_type == 'CommentActivityItem':
                 if len(activity['removed']) > 0:
