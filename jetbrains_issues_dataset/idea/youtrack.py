@@ -3,7 +3,7 @@ import time
 import requests
 
 ISSUES_QUERY = "issues?query={}&fields=id,idReadable,commentsCount,summary,description,customFields(name," \
-               "value(login)),comments(text,author(login))&$skip={}&$top={}"
+               "value(login)),comments(text,author(login,name))&$skip={}&$top={}"
 
 ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=IssueCreatedCategory,DescriptionCategory,SummaryCategory," \
                    "CustomFieldCategory,CommentsCategory&fields=id,idReadable,timestamp,targetMember,target(id," \
@@ -50,6 +50,7 @@ class YouTrack:
 
             with open(file_path, 'a+', encoding='utf-8') as writer:
                 for activity in activity_list:
+                    activity['element_type'] = 'activity'
                     line = json.dumps(activity, ensure_ascii=False)
                     writer.write(line + '\n')
 
@@ -58,7 +59,7 @@ class YouTrack:
 
             skip += len(activity_list)
 
-    def query_all_issues(self, query):
+    def download_issues(self, query, file_path):
         skip = 0
         all_issues = []
         while True:
@@ -73,7 +74,11 @@ class YouTrack:
             skip += len(loaded_issues)
             all_issues += loaded_issues
 
-        return all_issues
+        with open(file_path, 'a+', encoding='utf-8') as writer:
+            for issue in all_issues:
+                issue['element_type'] = 'issue'
+                line = json.dumps(issue, ensure_ascii=False)
+                writer.write(line + '\n')
 
     @staticmethod
     def check_response(json_response):

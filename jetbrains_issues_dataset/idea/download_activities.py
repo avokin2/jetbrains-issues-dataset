@@ -11,9 +11,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # Do not use production server here!
-YOUTRACK_SERVER_URL = "http://youtrack-staging.labs.intellij.net/"
+YOUTRACK_SERVER_URL = "https://youtrack-staging.labs.intellij.net/"
 
-snapshot_start_time = datetime.datetime.strptime("2019-09-01 00:00:00", '%Y-%m-%d %H:%M:%S')
+snapshot_start_time = datetime.datetime.strptime("2020-09-01 00:00:00", '%Y-%m-%d %H:%M:%S')
 snapshot_end_time = datetime.datetime.now()
 
 processing_start_time = datetime.datetime.now()
@@ -37,8 +37,9 @@ while snapshot_start_time < snapshot_end_time:
     end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
     print("Processing from: {} to: {}".format(start, end))
-    query = "%23KT%20created:%20{}%20..%20{}".format(start, end)
+    query = "%23IDEA%20created:%20{}%20..%20{}".format(start, end)
     youtrack.download_activities(query, snapshot_file)
+    youtrack.download_issues(query, snapshot_file)
     snapshot_start_time = current_end_date
 
 print("Duration: {}".format((datetime.datetime.now() - processing_start_time)))
