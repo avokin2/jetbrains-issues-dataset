@@ -3,11 +3,11 @@ import time
 import requests
 
 ISSUES_QUERY = "issues?query={}&fields=id,idReadable,commentsCount,summary,description,customFields(name," \
-               "value(login)),comments(text,author(login,name))&$skip={}&$top={}"
+               "value(name,login)),comments(text,author(login,name))&$skip={}&$top={}"
 
 ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=IssueCreatedCategory,DescriptionCategory,SummaryCategory," \
                    "CustomFieldCategory,CommentsCategory&fields=id,idReadable,timestamp,targetMember,target(id," \
-                   "reporter(login),idReadable,summary,description,text,issue(id),customFields(id,name,value(login,name)))," \
+                   "reporter(login),idReadable,text,issue(id),customFields(id,name,value(login,name)))," \
                    "memberName,added(id,login,name,text),removed(id,login,name,text)&$skip={}&$top={}"
 
 

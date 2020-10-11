@@ -14,6 +14,22 @@ class ActivityManager:
         if custom_field_mapping is None:
             custom_field_mapping = {}
         self.custom_field_mapping = custom_field_mapping
+        self.final_issues = {}
+
+    def process_issue_final_state(self, issue):
+        for custom_field in issue['customFields']:
+            if custom_field is None or custom_field['value'] is None:
+                continue
+            if 'login' in custom_field['value']:
+                value = custom_field['value']['login']
+            elif 'name' in custom_field['value']:
+                value = custom_field['value']['name']
+            else:
+                value = None
+            if value is not None:
+                issue[custom_field['name'].lower()] = value
+
+        self.final_issues[issue['id']] = issue
 
     def load_issues_from_activities_file(self, file_path):
         with open('%s' % file_path, 'r', encoding='utf-8') as reader:
@@ -21,8 +37,12 @@ class ActivityManager:
                 line = reader.readline()
                 if line is None or len(line) == 0:
                     break
-                activity = json.loads(line)
-                self._apply_activity(activity)
+                element = json.loads(line)
+                element_type = element['element_type']
+                if element_type == 'issue':
+                    self.process_issue_final_state(element)
+                elif element_type == 'activity':
+                    self._apply_activity(element)
 
         for issue in self.issues.values():
             self.snapshot_strategy.process_previous_attribute_values(issue)
@@ -43,8 +63,7 @@ class ActivityManager:
 
             if issue_id not in self.issues:
                 target_issue = activity['target']
-                issue = {'id': issue_id, 'id_readable': target_issue['idReadable'], 'summary': target_issue['summary'],
-                         'description': target_issue['description'], 'reporter': target_issue['reporter']['login'],
+                issue = {'id': issue_id, 'id_readable': target_issue['idReadable'], 'reporter': target_issue['reporter']['login'],
                          'comments': {}}
 
                 for custom_field in target_issue['customFields']:
@@ -64,7 +83,8 @@ class ActivityManager:
 
                 if issue is not None:
                     self.snapshot_strategy.process_issue_created(
-                        {'id': issue_id, 'id_readable': target_issue['idReadable'], 'comments': {}})
+                        {'id': issue_id, 'id_readable': target_issue['idReadable'], 'comments': {}},
+                        self.final_issues[issue_id])
             else:
                 print("Duplicated IssueCreatedActivityItem for issue: {}".format(issue_id))
         else:
@@ -104,10 +124,11 @@ class ActivityManager:
                     if added is not None and len(added) == 0:
                         added = None
 
+                final_issue_state = self.final_issues[issue_id]
                 if removed is not None:
-                    self.snapshot_strategy.process_removed_field(issue_id, target_member, removed)
+                    self.snapshot_strategy.process_removed_field(issue_id, target_member, removed, final_issue_state)
                 if added is not None:
-                    self.snapshot_strategy.process_added_field(issue_id, target_member, added)
+                    self.snapshot_strategy.process_added_field(issue_id, target_member, added, final_issue_state)
 
             elif activity_type == 'CommentActivityItem':
                 if len(activity['removed']) > 0:

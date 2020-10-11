@@ -13,7 +13,7 @@ class SnapshotStrategy:
             if key not in snapshot_issue:
                 snapshot_issue[key] = value
 
-    def process_issue_created(self, issue):
+    def process_issue_created(self, issue, final_issue_state):
         if issue['id'] not in self.issues:
             self.issues[issue['id']] = issue.copy()
 
@@ -24,10 +24,10 @@ class SnapshotStrategy:
         for key, value in issue.items():
             snapshot_issue[key] = value
 
-        self.process(issue)
+        self.process(issue, final_issue_state)
 
-    def process_added_field(self, id, field, value):
-        self.process({'id': id, field: value})
+    def process_added_field(self, id, field, value, final_issue_state):
+        self.process({'id': id, field: value}, final_issue_state)
         snapshot_issue = self._get_snapshot_issue_to_process(id)
         if snapshot_issue is None:
             return
@@ -40,8 +40,8 @@ class SnapshotStrategy:
             else:
                 snapshot_issue[field] = value
 
-    def process_removed_field(self, id, field, removed_value):
-        self.process({'id': id, field: removed_value})
+    def process_removed_field(self, id, field, removed_value, final_issue_state):
+        self.process({'id': id, field: removed_value}, final_issue_state)
         self.process_previous_attribute_values({'id': id, field: removed_value})
 
         snapshot_issue = self._get_snapshot_issue_to_process(id)
@@ -62,7 +62,7 @@ class SnapshotStrategy:
             return
         snapshot_issue['comments'][comment['id']] = comment['text']
 
-    def process(self, issue):
+    def process(self, issue, final_issue_state):
         pass
 
     def _get_snapshot_issue_to_process(self, issue_id):
