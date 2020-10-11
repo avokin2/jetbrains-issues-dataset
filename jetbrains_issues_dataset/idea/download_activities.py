@@ -39,7 +39,6 @@ while snapshot_start_time < snapshot_end_time:
     print("Processing from: {} to: {}".format(start, end))
     query = "%23KT%20created:%20{}%20..%20{}".format(start, end)
     youtrack.download_activities(query, snapshot_file)
-    youtrack.download_activities(query, snapshot_file)
     snapshot_start_time = current_end_date
 
 print("Duration: {}".format((datetime.datetime.now() - processing_start_time)))
