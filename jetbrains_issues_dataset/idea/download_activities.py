@@ -12,33 +12,33 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 YOUTRACK_SERVER_URL = "http://youtrack-staging.labs.intellij.net/"
 
-start_date = datetime.datetime.strptime("2019-09-01 00:00:00", '%Y-%m-%d %H:%M:%S')
-end_date = datetime.datetime.now()
+snapshot_start_time = datetime.datetime.strptime("2019-09-01 00:00:00", '%Y-%m-%d %H:%M:%S')
+snapshot_end_time = datetime.datetime.now()
 
-start_time = datetime.datetime.now()
+processing_start_time = datetime.datetime.now()
 
 youtrack = YouTrack(YOUTRACK_SERVER_URL, None)
 
 if not path.exists('data'):
     os.mkdir('data')
 
-activities_file = 'data/activities.json'
-with open('%s' % activities_file, 'w', encoding='utf-8') as writer:
+snapshot_file = 'data/snapshot.json'
+with open('%s' % snapshot_file, 'w', encoding='utf-8') as writer:
     pass
 
-current_end_date = start_date
-while start_date < end_date:
+current_end_date = snapshot_start_time
+while snapshot_start_time < snapshot_end_time:
     current_end_date += relativedelta(weeks=1)
-    if current_end_date > end_date:
-        current_end_date = end_date
+    if current_end_date > snapshot_end_time:
+        current_end_date = snapshot_end_time
 
-    start = start_date.strftime('%Y-%m-%dT%H:%M:%S')
+    start = snapshot_start_time.strftime('%Y-%m-%dT%H:%M:%S')
     end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
     print("Processing from: {} to: {}".format(start, end))
     query = "%23KT%20created:%20{}%20..%20{}".format(start, end)
-    youtrack.download_activities(query, activities_file)
-    youtrack.download_activities(query, activities_file)
-    start_date = current_end_date
+    youtrack.download_activities(query, snapshot_file)
+    youtrack.download_activities(query, snapshot_file)
+    snapshot_start_time = current_end_date
 
-print("Duration: {}".format((datetime.datetime.now() - start_time)))
+print("Duration: {}".format((datetime.datetime.now() - processing_start_time)))
