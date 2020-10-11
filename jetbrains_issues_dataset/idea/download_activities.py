@@ -10,6 +10,7 @@ from jetbrains_issues_dataset.idea.youtrack import YouTrack
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+# Do not use production server here!
 YOUTRACK_SERVER_URL = "http://youtrack-staging.labs.intellij.net/"
 
 snapshot_start_time = datetime.datetime.strptime("2019-09-01 00:00:00", '%Y-%m-%d %H:%M:%S')
