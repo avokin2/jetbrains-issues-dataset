@@ -1,19 +1,17 @@
-from setuptools import setup
 from distutils.core import setup
 
 
 setup(
     name='jetbrains-issues-dataset',
     packages=['jetbrains_issues_dataset', 'jetbrains_issues_dataset.idea'],
-    version='1.0.4',
+    version='1.0.5',
     license='MIT',
     description='Dataset of JetBrains issues',
-    long_description_content_type='text/markdown',
-    long_description=open('README.md').read(),
+    long_description='Datasets of IDEA issues. See https://github.com/avokin2/jetbrains-issues-dataset',
     author='Andrey Vokin',
     author_email='andrey.vokin@gmail.com',
     url='https://github.com/avokin2/jetbrains-issues-dataset',
-    download_url='https://github.com/avokin2/jetbrains-issues-dataset/archive/v_1.0.4.tar.gz',
+    download_url='https://github.com/avokin2/jetbrains-issues-dataset/archive/v_1.0.5.tar.gz',
     keywords=[],
     install_requires=[],
     classifiers=[
