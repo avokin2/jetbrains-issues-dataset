@@ -13,10 +13,20 @@ class TestIssueCreatedSnapshotStrategy(TestCase):
         issue = list(snapshot_strategy.issues.values())[0]
         self.assertEqual(issue['fixed_by'], 'assignee_developer')
 
+    def test_all_main_field_presence(self):
+        snapshot_strategy = IssueCreatedSnapshotStrategy()
+        activity_manager = IdeaActivityManager(snapshot_strategy)
+        activity_manager.load_issues_from_activities_file('data/missed_activities.json')
+
+        issue = list(snapshot_strategy.issues.values())[0]
+        self.assertTrue('summary' in issue)
+        self.assertTrue('description' in issue)
+        self.assertTrue('state' in issue)
+
     def test_read_all(self):
         snapshot_strategy = IssueCreatedSnapshotStrategy()
         activity_manager = IdeaActivityManager(snapshot_strategy)
         activity_manager.load_issues_from_activities_file('data/snapshot.json')
 
-        issue = list(snapshot_strategy.issues.values())[0]
+        self.assertEqual(145, len(snapshot_strategy.issues.values()))
 
