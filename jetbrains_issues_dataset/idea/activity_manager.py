@@ -46,6 +46,8 @@ class ActivityManager:
 
         for issue in self.final_issues.values():
             self.snapshot_strategy.process_previous_attribute_values(issue)
+        for issue in self.issues.values():
+            self.snapshot_strategy.process_previous_attribute_values(issue)
 
         return self.issues
 

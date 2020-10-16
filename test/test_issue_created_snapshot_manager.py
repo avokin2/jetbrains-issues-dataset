@@ -22,6 +22,7 @@ class TestIssueCreatedSnapshotStrategy(TestCase):
         self.assertTrue('summary' in issue)
         self.assertTrue('description' in issue)
         self.assertTrue('state' in issue)
+        self.assertTrue('reporter' in issue)
 
     def test_read_all(self):
         snapshot_strategy = IssueCreatedSnapshotStrategy()
