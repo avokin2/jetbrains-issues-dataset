@@ -26,8 +26,8 @@ class SnapshotStrategy:
 
         self.process(issue, final_issue_state)
 
-    def process_added_field(self, id, field, value, final_issue_state):
-        self.process({'id': id, field: value}, final_issue_state)
+    def process_added_field(self, id, field, value, final_issue_state, timestamp):
+        self.process({'id': id, field: value, 'timestamp': timestamp}, final_issue_state)
         snapshot_issue = self._get_snapshot_issue_to_process(id)
         if snapshot_issue is None:
             return

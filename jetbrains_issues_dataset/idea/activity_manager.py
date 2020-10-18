@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 
 
@@ -66,7 +67,7 @@ class ActivityManager:
             if issue_id not in self.issues:
                 target_issue = activity['target']
                 issue = {'id': issue_id, 'id_readable': target_issue['idReadable'], 'reporter': target_issue['reporter']['login'],
-                         'comments': {}}
+                         'comments': {}, 'created at': self.get_datetime(activity)}
 
                 for custom_field in target_issue['customFields']:
                     for allowed_custom_field_name, allowed_custom_field_params in self.custom_field_mapping.items():
@@ -100,6 +101,7 @@ class ActivityManager:
 
                 removed = activity['removed'] if 'removed' in activity else None
                 added = activity['added'] if 'added' in activity else None
+                timestamp = self.get_datetime(activity)
 
                 if activity_type == 'CustomFieldActivityItem':
                     if target_member not in self.custom_field_mapping:
@@ -130,7 +132,7 @@ class ActivityManager:
                 if removed is not None:
                     self.snapshot_strategy.process_removed_field(issue_id, target_member, removed, final_issue_state)
                 if added is not None:
-                    self.snapshot_strategy.process_added_field(issue_id, target_member, added, final_issue_state)
+                    self.snapshot_strategy.process_added_field(issue_id, target_member, added, final_issue_state, timestamp)
 
             elif activity_type == 'CommentActivityItem':
                 if len(activity['removed']) > 0:
@@ -143,3 +145,6 @@ class ActivityManager:
 
                 self.snapshot_strategy.process_added_comment(
                     {'issue_id': issue_id, 'id': comment['id'], 'text': comment['text']})
+
+    def get_datetime(self, activity):
+        return datetime.fromtimestamp(int(activity['timestamp'] / 1000))

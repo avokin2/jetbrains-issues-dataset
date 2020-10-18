@@ -22,4 +22,6 @@ class IssueCreatedSnapshotStrategy(SnapshotStrategy):
                 elif 'assignee' in final_issue_state:
                     assignee = final_issue_state['assignee']
                 if assignee is not None:
+                    if 'timestamp' in issue:
+                        snapshot_issue['fixed_at'] = issue['timestamp']
                     snapshot_issue['fixed_by'] = assignee

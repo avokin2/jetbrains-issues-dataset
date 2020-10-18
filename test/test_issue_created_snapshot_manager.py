@@ -1,3 +1,4 @@
+import datetime
 from unittest import TestCase
 
 from jetbrains_issues_dataset.idea.idea_activity_manager import IdeaActivityManager
@@ -12,6 +13,7 @@ class TestIssueCreatedSnapshotStrategy(TestCase):
 
         issue = list(snapshot_strategy.issues.values())[0]
         self.assertEqual(issue['fixed_by'], 'assignee_developer')
+        self.assertEqual(issue['fixed_at'], datetime.datetime(2020, 10, 6, 21, 45, 26))
 
     def test_all_main_field_presence(self):
         snapshot_strategy = IssueCreatedSnapshotStrategy()
