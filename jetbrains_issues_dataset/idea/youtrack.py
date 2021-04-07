@@ -2,8 +2,12 @@ import json
 import time
 import requests
 
-ISSUES_QUERY = "issues?query={}&fields=id,idReadable,commentsCount,summary,description,customFields(name," \
-               "value(name,login)),comments(text,author(login,name))&$skip={}&$top={}"
+ISSUES_QUERY = "issues?query={}&fields=" \
+               "id,idReadable,created,resolved,reporter(login),commentsCount,summary,description," \
+               "customFields(name,value(name,login))," \
+               "comments(created,text,author(login,name))," \
+               "links(direction,linkType(name,sourceToTarget,targetToSource,directed,aggregation),issues(id,idReadable))" \
+               "&$skip={}&$top={}"
 
 ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=IssueCreatedCategory,DescriptionCategory,SummaryCategory," \
                    "CustomFieldCategory,CommentsCategory&fields=id,idReadable,timestamp,targetMember,target(id," \
@@ -26,7 +30,7 @@ class YouTrack:
         self.activity_list_url = self.new_api_url + ACTIVITIES_QUERY
         self.issue_list_url = self.new_api_url + ISSUES_QUERY
 
-    def download_activities(self, query, file_path):
+    def download_activities(self, query, file_path) -> int:
         skip = 0
         while True:
             print("skip: {}".format(skip))
@@ -39,12 +43,13 @@ class YouTrack:
                     response = requests.get(request_url, headers=self.headers, verify=False)
                     activity_list = response.json()
                     break
-                except Exception:
+                except Exception as e:
+                    print(e)
                     time.sleep(3)
                 attempt += 1
 
             if activity_list is None:
-                raise Exception("Fail to retrieve activities")
+                raise Exception("Failed to retrieve activities")
 
             self.check_response(activity_list)
 
@@ -58,8 +63,9 @@ class YouTrack:
                 break
 
             skip += len(activity_list)
+        return skip + len(activity_list)
 
-    def download_issues(self, query, file_path):
+    def download_issues(self, query, file_path) -> int:
         skip = 0
         all_issues = []
         while True:
@@ -78,7 +84,13 @@ class YouTrack:
             for issue in all_issues:
                 issue['element_type'] = 'issue'
                 line = json.dumps(issue, ensure_ascii=False)
-                writer.write(line + '\n')
+                try:
+                    writer.write(line + '\n')
+                except Exception as e:
+                    print(issue['id'])
+                    raise e
+
+        return len(all_issues)
 
     @staticmethod
     def check_response(json_response):
