@@ -1,10 +1,11 @@
 import datetime
+import sys
 from urllib import parse
 
 import urllib3
 from dateutil.relativedelta import relativedelta
 
-from jetbrains_issues_dataset.idea.youtrack import YouTrack
+from jetbrains_issues_dataset.youtrack_loader.youtrack import YouTrack
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -60,13 +61,12 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
           f'in {datetime.datetime.now() - processing_start_time:.2f}s')
 
 
-if __name__ == '__main__':
+def main():
     import argparse
     import os
     import re
 
     parser = argparse.ArgumentParser()
-
 
     def youtrack_date(value):
         if isinstance(value, datetime.datetime):
@@ -80,15 +80,14 @@ if __name__ == '__main__':
         except ValueError:
             raise ValueError(f'value "{value}" cannot be parsed as YouTrack date')
 
-
     parser.add_argument('--start',
-                        help="earliest issue creation date in format %Y-%m-%dT%H:%M:%S "
+                        help="earliest issue creation date in format 1970-01-01T10:00:00 "
                              "(YouTrack search query date format; note the T between date and time)",
                         required=True,
                         type=youtrack_date
                         )
     parser.add_argument('--end',
-                        help="latest issue creation date in format %Y-%m-%dT%H:%M:%S "
+                        help="latest issue creation date in format 1970-01-01T10:00:00 "
                              "(YouTrack search query date format; note the T between date and time); "
                              "current time by default",
                         required=False,
@@ -143,3 +142,7 @@ if __name__ == '__main__':
     download_data(youtrack=youtrack, snapshot_start_time=args.start, snapshot_end_time=args.end,
                   issues_snapshot_file=issues_snapshot_file, activities_snapshot_file=activities_snapshot_file,
                   query=query, load_issues=not args.no_issues, load_activities=not args.no_activities)
+
+
+if __name__ == '__main__':
+    main()

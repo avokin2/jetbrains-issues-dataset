@@ -41,6 +41,7 @@ class YouTrack:
             while attempt < 5:
                 try:
                     response = requests.get(request_url, headers=self.headers, verify=False)
+                    print(response)
                     activity_list = response.json()
                     break
                 except Exception as e:
