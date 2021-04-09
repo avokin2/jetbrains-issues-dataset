@@ -17,7 +17,14 @@ issues = idea_2018_10_15_to_idea_2020_10_15(IssueCreatedSnapshotStrategy())
 Or just check the file [examples/first_assignee.py](examples/first_assignee.py)
 
 ## Create your custom dataset
-Just tune the file [jetbrains_issues_dataset/idea/download_activities.py](jetbrains_issues_dataset/idea/download_activities.py). 
+
+For simple adjustments, you can use the provided command line interface by calling `youtrack_downloader`. E.g., to collect only current states of very annoying Rider issues for the year 2020, use the following:
+```shell
+ youtrack_downloader --start 2020-01-01 --end 2021-01-01 --server-address YOUR_SERVER_ADDRESS --access-token YOUR_ACCESS_TOKEN --query project: Rider User priority: \{Very annoying\} --no-activities
+```
+See all CLI options in `youtrack_downloader --help`.
+
+For more complicated adjustments (e.g., adding or removing field information, selecting specific types of activity items), tune the downloader script [jetbrains_issues_dataset/youtrack_loader/download_activities.py](jetbrains_issues_dataset/youtrack_loader/download_activities.py) and YouTrack client [jetbrains_issues_dataset/youtrack_loader/youtrack.py](jetbrains_issues_dataset/youtrack_loader/youtrack.py). 
 It could be useful to read [Youtrack API Reference](https://www.jetbrains.com/help/youtrack/standalone/youtrack-rest-api-reference.html)
 Also do not run downloader on production server.
 
