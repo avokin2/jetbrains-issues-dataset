@@ -84,7 +84,7 @@ class YouTrack:
         with open(file_path, 'a+', encoding='utf-8') as writer:
             for issue in all_issues:
                 issue['element_type'] = 'issue'
-                line = json.dumps(issue, ensure_ascii=False)
+                line = json.dumps(issue, ensure_ascii=False).encode('utf-8', 'replace').decode('utf-8')
                 try:
                     writer.write(line + '\n')
                 except Exception as e:
