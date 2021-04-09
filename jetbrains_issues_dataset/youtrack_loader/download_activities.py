@@ -44,15 +44,15 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
         end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
         print(f"Processing from: {start} to: {end}")
-        query = f"{query} created: {start} .. {end}"
+        timed_query = f"{query} created: {start} .. {end}"
 
         if load_issues:
-            n_issues = youtrack.download_issues(parse.quote_plus(query), issues_snapshot_file)
+            n_issues = youtrack.download_issues(parse.quote_plus(timed_query), issues_snapshot_file)
             print(f'Loaded {n_issues} issues')
             total_issues += n_issues
 
         if load_activities:
-            n_activities = youtrack.download_activities(parse.quote_plus(query), activities_snapshot_file)
+            n_activities = youtrack.download_activities(parse.quote_plus(timed_query), activities_snapshot_file)
             print(f'Loaded {n_activities} activities')
             total_activities += n_activities
         snapshot_start_time = current_end_date
