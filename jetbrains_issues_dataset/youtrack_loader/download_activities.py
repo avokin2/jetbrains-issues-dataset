@@ -58,7 +58,7 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
         snapshot_start_time = current_end_date
 
     print(f'Loaded {total_issues} issues and {total_activities} activity items '
-          f'in {datetime.datetime.now() - processing_start_time:.2f}s')
+          f'in {str(datetime.datetime.now() - processing_start_time)}')
 
 
 def main():
