@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 import requests
 
@@ -33,7 +34,6 @@ class YouTrack:
     def download_activities(self, query, file_path) -> int:
         skip = 0
         while True:
-            print("skip: {}".format(skip))
             request_url = self.activity_list_url.format(query, skip, self.page_size)
 
             activity_list = None
@@ -44,7 +44,7 @@ class YouTrack:
                     activity_list = response.json()
                     break
                 except Exception as e:
-                    print(e)
+                    logging.exception(e)
                     time.sleep(3)
                 attempt += 1
 
@@ -87,7 +87,7 @@ class YouTrack:
                 try:
                     writer.write(line + '\n')
                 except Exception as e:
-                    print(issue['id'])
+                    logging.exception(issue['id'])
                     raise e
 
         return len(all_issues)

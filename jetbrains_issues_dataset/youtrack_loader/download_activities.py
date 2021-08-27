@@ -4,9 +4,11 @@ from urllib import parse
 
 import urllib3
 from dateutil.relativedelta import relativedelta
+import logging
 
 from jetbrains_issues_dataset.youtrack_loader.youtrack import YouTrack
 
+logging.basicConfig(format='%(asctime)s %(message)s', filename='download.log', level=getattr(logging, 'DEBUG'))
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -53,22 +55,22 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
         end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
         timed_query = f"{query} updated: {start} .. {end}"
-        print(f"{cur_time()} Processing from: {start} to: {end}, query: {timed_query}")
+        logging.info(f"Processing from: {start} to: {end}, query: {timed_query}")
 
         if load_issues:
             n_issues = youtrack.download_issues(parse.quote_plus(timed_query), issues_snapshot_file)
-            print(f'{cur_time()} Loaded {n_issues} issues')
+            logging.info(f'Loaded {n_issues} issues')
             total_issues += n_issues
         else:
             n_issues = 1
 
         if load_activities and n_issues > 0:
             n_activities = youtrack.download_activities(parse.quote_plus(timed_query), activities_snapshot_file)
-            print(f'{cur_time()} Loaded {n_activities} activities')
+            logging.info(f'Loaded {n_activities} activities')
             total_activities += n_activities
         snapshot_start_time = current_end_date
 
-    print(f'{cur_time()} Loaded {total_issues} issues and {total_activities} activity items '
+    logging.info(f'Loaded {total_issues} issues and {total_activities} activity items '
           f'in {str(datetime.datetime.now() - processing_start_time)}')
 
 
