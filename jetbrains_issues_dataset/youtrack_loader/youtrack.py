@@ -4,9 +4,9 @@ import time
 import requests
 
 ISSUES_QUERY = "issues?query={}&fields=" \
-               "id,idReadable,created,resolved,reporter(login),commentsCount,summary,description," \
-               "customFields(name,value(name,login))," \
-               "comments(created,text,author(login,name))," \
+               "id,idReadable,created,resolved,reporter(login,name,ringId),commentsCount,summary,description," \
+               "customFields(name,value(name,login,ringId))," \
+               "comments(created,text,author(login,name,ringId))," \
                "links(direction,linkType(name,sourceToTarget,targetToSource,directed,aggregation),issues(id,idReadable))" \
                "&$skip={}&$top={}"
 

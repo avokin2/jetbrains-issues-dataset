@@ -20,7 +20,7 @@ Or just check the file [examples/first_assignee.py](examples/first_assignee.py)
 
 For simple adjustments, you can use the provided command line interface by calling `youtrack_downloader`. E.g., to collect only current states of very annoying Rider issues for the year 2020, use the following:
 ```shell
- youtrack_downloader --start 2020-01-01 --end 2021-01-01 --server-address YOUR_SERVER_ADDRESS --access-token YOUR_ACCESS_TOKEN --query project: Rider User priority: \{Very annoying\} --no-activities
+youtrack_downloader --start 2020-01-01 --end 2021-01-01 --server-address YOUR_SERVER_ADDRESS --access-token YOUR_ACCESS_TOKEN --query project: Rider User priority: \{Very annoying\}
 ```
 See all CLI options in `youtrack_downloader --help`.
 
