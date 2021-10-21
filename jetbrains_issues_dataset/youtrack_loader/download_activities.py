@@ -58,14 +58,15 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
         logging.info(f"Processing from: {start} to: {end}, query: {timed_query}")
 
         if load_issues:
-            n_issues = youtrack.download_issues(parse.quote_plus(timed_query), issues_snapshot_file)
-            logging.info(f'Loaded {n_issues} issues')
-            total_issues += n_issues
+            issues = youtrack.download_issues(parse.quote_plus(timed_query), issues_snapshot_file, return_ids=True)
+            logging.info(f'Loaded {len(issues)} issues')
+            total_issues += len(issues)
         else:
             n_issues = 1
 
-        if load_activities and n_issues > 0:
-            n_activities = youtrack.download_activities(parse.quote_plus(timed_query), activities_snapshot_file)
+        if load_activities and len(issues) > 0:
+            # n_activities = youtrack.download_activities(parse.quote_plus(timed_query), activities_snapshot_file)
+            n_activities = youtrack.download_activities_per_issue(issues, activities_snapshot_file)
             logging.info(f'Loaded {n_activities} activities')
             total_activities += n_activities
         snapshot_start_time = current_end_date
