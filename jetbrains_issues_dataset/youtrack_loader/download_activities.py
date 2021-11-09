@@ -4,15 +4,17 @@ from urllib import parse
 
 import urllib3
 from dateutil.relativedelta import relativedelta
+import logging
 
 from jetbrains_issues_dataset.youtrack_loader.youtrack import YouTrack
 
+logging.basicConfig(format='%(asctime)s %(message)s', filename='download.log', level=getattr(logging, 'DEBUG'))
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, snapshot_end_time: datetime.datetime,
                   issues_snapshot_file: str, activities_snapshot_file: str, query: str, load_issues=True,
-                  load_activities=True):
+                  load_activities=True, direction='asc', order_by='created'):
     """
     Most parameters have reasonable defaults set below in the CLI argument parser. Minimum working command from CLI if
     working from source:
@@ -25,40 +27,60 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
     :param query: query to filter issues; e.g., use `#IDEA` to obtain all IDEA issues
     :param load_issues: whether to load current issue states
     :param load_activities: whether to load activities
+    :param direction: download order: asc (from oldest to newest, default) or desc (from newest to oldest)
+    :param order_by: download order criteria: order by when issue was created or by when it was last updated
     """
     with open(issues_snapshot_file, 'w', encoding='utf-8') as writer:
         pass
     with open(activities_snapshot_file, 'w', encoding='utf-8') as writer:
         pass
 
+    assert snapshot_start_time < snapshot_end_time, f'No issues created after {snapshot_start_time} and before {snapshot_end_time}'
+    if direction == 'asc':
+        direction_flag = 1
+    elif direction == 'desc':
+        direction_flag = -1
+        snapshot_start_time, snapshot_end_time = snapshot_end_time, snapshot_start_time
+    else:
+        raise ValueError(f'direction must be either `asc` or `desc`; `{direction}` not recognized')
+
+    assert order_by in ['created', 'updated'], f'We can order by `created` or `updated` timestamp, `{order_by}` not allowed'
+
     total_issues = 0
     total_activities = 0
     processing_start_time = datetime.datetime.now()
     current_end_date = snapshot_start_time
-    while snapshot_start_time < snapshot_end_time:
-        current_end_date += relativedelta(weeks=1)
-        if current_end_date > snapshot_end_time:
+    while (direction_flag > 0 and snapshot_start_time < snapshot_end_time) or ((direction_flag < 0 and snapshot_start_time > snapshot_end_time)):
+        current_end_date += relativedelta(weeks=1 * direction_flag)
+        if (direction_flag > 0 and current_end_date > snapshot_end_time) or (direction_flag < 0 and current_end_date < snapshot_end_time):
             current_end_date = snapshot_end_time
 
         start = snapshot_start_time.strftime('%Y-%m-%dT%H:%M:%S')
         end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
-        print(f"Processing from: {start} to: {end}")
-        timed_query = f"{query} created: {start} .. {end}"
+        timed_query = f"{query} {order_by}: {start} .. {end}"
+        logging.info(f"Processing from: {start} to: {end}, query: {timed_query}")
 
         if load_issues:
-            n_issues = youtrack.download_issues(parse.quote_plus(timed_query), issues_snapshot_file)
-            print(f'Loaded {n_issues} issues')
-            total_issues += n_issues
+            issues = youtrack.download_issues(parse.quote_plus(timed_query), issues_snapshot_file, return_ids=True)
+            logging.info(f'Loaded {len(issues)} issues')
+            total_issues += len(issues)
+        else:
+            n_issues = 1
 
-        if load_activities:
-            n_activities = youtrack.download_activities(parse.quote_plus(timed_query), activities_snapshot_file)
-            print(f'Loaded {n_activities} activities')
+        if load_activities and len(issues) > 0:
+            # n_activities = youtrack.download_activities(parse.quote_plus(timed_query), activities_snapshot_file)
+            n_activities = youtrack.download_activities_per_issue(issues, activities_snapshot_file)
+            logging.info(f'Loaded {n_activities} activities')
             total_activities += n_activities
         snapshot_start_time = current_end_date
 
-    print(f'Loaded {total_issues} issues and {total_activities} activity items '
-          f'in {datetime.datetime.now() - processing_start_time:.2f}s')
+    logging.info(f'Loaded {total_issues} issues and {total_activities} activity items '
+          f'in {str(datetime.datetime.now() - processing_start_time)}')
+
+
+def cur_time():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
 
 def main():
@@ -81,13 +103,13 @@ def main():
             raise ValueError(f'value "{value}" cannot be parsed as YouTrack date')
 
     parser.add_argument('--start',
-                        help="earliest issue creation date in format 1970-01-01T10:00:00 "
+                        help="earliest issue timestamp in format 1970-01-01T10:00:00 "
                              "(YouTrack search query date format; note the T between date and time)",
                         required=True,
                         type=youtrack_date
                         )
     parser.add_argument('--end',
-                        help="latest issue creation date in format 1970-01-01T10:00:00 "
+                        help="latest issue timestamp in format 1970-01-01T10:00:00 "
                              "(YouTrack search query date format; note the T between date and time); "
                              "current time by default",
                         required=False,
@@ -103,6 +125,11 @@ def main():
                         action='store_true')
     parser.add_argument('--no-activities', help='if specified, activities related to the issue will not be loaded',
                         action='store_true')
+    parser.add_argument('--direction', help='download order: asc (from oldest to newest, default) or desc (from newest to oldest)',
+                        choices=['asc', 'desc'], default='asc')
+    parser.add_argument('--order-by',
+                        help='download order criteria: order by when issue was created or by when it was last updated',
+                        choices=['created', 'updated'], default='created')
     parser.add_argument('--server-address',
                         help='where to download issues from',
                         default='https://youtrack-staging.labs.intellij.net/'
@@ -141,7 +168,8 @@ def main():
 
     download_data(youtrack=youtrack, snapshot_start_time=args.start, snapshot_end_time=args.end,
                   issues_snapshot_file=issues_snapshot_file, activities_snapshot_file=activities_snapshot_file,
-                  query=query, load_issues=not args.no_issues, load_activities=not args.no_activities)
+                  query=query, load_issues=not args.no_issues, load_activities=not args.no_activities,
+                  direction=args.direction, order_by=args.order_by)
 
 
 if __name__ == '__main__':
