@@ -6,7 +6,8 @@ from typing import Union, List
 import requests
 
 ISSUES_QUERY = "issues?query={}&fields=" \
-               "id,idReadable,created,resolved,reporter(login,name,ringId),commentsCount,summary,description," \
+               "id,idReadable,summary,description," \
+               "project(shortName),created,resolved,reporter(login,name,ringId),commentsCount," \
                "customFields(id,name,value(id,name,login,ringId))," \
                "comments(id,created,text,author(login,name,ringId))," \
                "links(direction,linkType(name,sourceToTarget,targetToSource,directed,aggregation),issues(id,idReadable))" \
@@ -24,7 +25,7 @@ ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCa
                              "IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
                              "SprintCategory,SummaryCategory,TagsCategory" \
                              "&fields=id,idReadable,timestamp,targetMember," \
-                             "target(id,reporter(login,name,ringId),idReadable,text,issue(id)," \
+                             "target(id,project(shortName),reporter(login,name,ringId),idReadable,text,issue(id)," \
                              "customFields(id,name,value(id,name,login,ringId))),memberName," \
                              "added(id,login,name,ringId,text,bundle(id,name))," \
                              "removed(id,login,name,text,bundle(id,name))" \
