@@ -14,7 +14,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, snapshot_end_time: datetime.datetime,
                   issues_snapshot_file: str, activities_snapshot_file: str, query: str, load_issues=True,
-                  load_activities=True, direction='asc'):
+                  load_activities=True, direction='asc', order_by='created'):
     """
     Most parameters have reasonable defaults set below in the CLI argument parser. Minimum working command from CLI if
     working from source:
@@ -27,6 +27,8 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
     :param query: query to filter issues; e.g., use `#IDEA` to obtain all IDEA issues
     :param load_issues: whether to load current issue states
     :param load_activities: whether to load activities
+    :param direction: download order: asc (from oldest to newest, default) or desc (from newest to oldest)
+    :param order_by: download order criteria: order by when issue was created or by when it was last updated
     """
     with open(issues_snapshot_file, 'w', encoding='utf-8') as writer:
         pass
@@ -42,6 +44,8 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
     else:
         raise ValueError(f'direction must be either `asc` or `desc`; `{direction}` not recognized')
 
+    assert order_by in ['created', 'updated'], f'We can order by `created` or `updated` timestamp, `{order_by}` not allowed'
+
     total_issues = 0
     total_activities = 0
     processing_start_time = datetime.datetime.now()
@@ -54,7 +58,7 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
         start = snapshot_start_time.strftime('%Y-%m-%dT%H:%M:%S')
         end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
-        timed_query = f"{query} updated: {start} .. {end}"
+        timed_query = f"{query} {order_by}: {start} .. {end}"
         logging.info(f"Processing from: {start} to: {end}, query: {timed_query}")
 
         if load_issues:
@@ -99,13 +103,13 @@ def main():
             raise ValueError(f'value "{value}" cannot be parsed as YouTrack date')
 
     parser.add_argument('--start',
-                        help="earliest issue creation date in format 1970-01-01T10:00:00 "
+                        help="earliest issue timestamp in format 1970-01-01T10:00:00 "
                              "(YouTrack search query date format; note the T between date and time)",
                         required=True,
                         type=youtrack_date
                         )
     parser.add_argument('--end',
-                        help="latest issue creation date in format 1970-01-01T10:00:00 "
+                        help="latest issue timestamp in format 1970-01-01T10:00:00 "
                              "(YouTrack search query date format; note the T between date and time); "
                              "current time by default",
                         required=False,
@@ -123,6 +127,9 @@ def main():
                         action='store_true')
     parser.add_argument('--direction', help='download order: asc (from oldest to newest, default) or desc (from newest to oldest)',
                         choices=['asc', 'desc'], default='asc')
+    parser.add_argument('--order-by',
+                        help='download order criteria: order by when issue was created or by when it was last updated',
+                        choices=['created', 'updated'], default='created')
     parser.add_argument('--server-address',
                         help='where to download issues from',
                         default='https://youtrack-staging.labs.intellij.net/'
@@ -161,7 +168,8 @@ def main():
 
     download_data(youtrack=youtrack, snapshot_start_time=args.start, snapshot_end_time=args.end,
                   issues_snapshot_file=issues_snapshot_file, activities_snapshot_file=activities_snapshot_file,
-                  query=query, load_issues=not args.no_issues, load_activities=not args.no_activities, direction=args.direction)
+                  query=query, load_issues=not args.no_issues, load_activities=not args.no_activities,
+                  direction=args.direction, order_by=args.order_by)
 
 
 if __name__ == '__main__':
